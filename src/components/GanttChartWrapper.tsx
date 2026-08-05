@@ -265,7 +265,6 @@ export const GanttChartWrapper: React.FC<GanttChartWrapperProps> = ({
             columnWidth={viewMode === ViewMode.Month ? 250 : viewMode === ViewMode.Week ? 120 : 65}
             ganttHeight={320}
             barCornerRadius={10}
-            barProgressCornerRadius={8}
             handleWidth={8}
           />
         )}
