@@ -1,27 +1,27 @@
 id,name,department,type,start,end,progress
 mech-1,Shock cords material finalization and length calculation,mechanical,task,2026-08-04,2026-08-08,20
-mech-2,Avionics bay CAD modelling,mechanical,task,2026-08-04,2026-08-09,20
-mech-3,Parachutes dimensioning and calculations,mechanical,task,2026-08-04,2026-08-10,20
-mech-4,Rail mechanism for CANSAT deployment,mechanical,task,2026-08-04,2026-08-11,20
-mech-5,Making open rocket model of the rocket,mechanical,task,2026-08-04,2026-08-12,20
-mech-6,Finalizing motor class and impulse required,mechanical,task,2026-08-04,2026-08-13,20
-mech-7,Camera integration based on constraints by elec,mechanical,task,2026-08-04,2026-08-14,20
-mech-8,Fin profile and integration with body tube,mechanical,task,2026-08-04,2026-08-15,20
-mech-9,Black powder calculation for rocket's recovery,mechanical,task,2026-08-04,2026-08-16,20
-mech-10,Calculation of landing legs,mechanical,task,2026-08-05,2026-08-17,20
-mech-11,Integration drill mechanism with probe,mechanical,task,2026-08-05,2026-08-18,20
-cs-1,Refine and test custom drivers for chosen sensors,cs,task,2026-08-05,2026-08-12,20
-cs-2,Look through STM documentation,cs,task,2026-08-05,2026-08-13,20
-cs-3,Look at KF and EKF math,cs,task,2026-08-05,2026-08-14,20
-cs-4,Frontend for the GCS - React,cs,task,2026-08-05,2026-08-15,20
-cs-5,Backend for the GCS - Node,cs,task,2026-08-05,2026-08-16,20
-cs-6,Review and use STM programs for sensors for the FC,cs,task,2026-08-05,2026-08-17,20
-elec-1,Schematics for the Rocket PCBs and routing,electrical,task,2026-08-05,2026-08-18,20
-elec-2,Antenna design for the GCS,electrical,task,2026-08-05,2026-08-19,20
+mech-2,Avionics bay CAD modelling,mechanical,task,2026-08-04,2026-08-08,20
+mech-3,Parachutes dimensioning and calculations,mechanical,task,2026-08-04,2026-08-08,20
+mech-4,Rail mechanism for CANSAT deployment,mechanical,task,2026-08-04,2026-08-08,20
+mech-5,Making open rocket model of the rocket,mechanical,task,2026-08-04,2026-08-08,20
+mech-6,Finalizing motor class and impulse required,mechanical,task,2026-08-04,2026-08-17,20
+mech-7,Camera integration based on constraints by elec,mechanical,task,2026-08-04,2026-08-17,20
+mech-8,Fin profile and integration with body tube,mechanical,task,2026-08-04,2026-08-18,20
+mech-9,Black powder calculation for rocket's recovery,mechanical,task,2026-08-04,2026-08-18,20
+mech-10,Calculation of landing legs,mechanical,task,2026-08-05,2026-08-19,20
+mech-11,Integration drill mechanism with probe,mechanical,task,2026-08-05,2026-08-19,20
+cs-1,Refine and test custom drivers for chosen sensors,cs,task,2026-08-05,2026-08-17,20
+cs-2,Look through STM documentation,cs,task,2026-08-05,2026-08-17,20
+cs-3,Look at KF and EKF math,cs,task,2026-08-05,2026-08-18,20
+cs-4,Frontend for the GCS - React,cs,task,2026-08-05,2026-08-18,20
+cs-5,Backend for the GCS - Node,cs,task,2026-08-05,2026-08-19,20
+cs-6,Review and use STM programs for sensors for the FC,cs,task,2026-08-05,2026-08-19,20
+elec-1,Schematics for the Rocket PCBs and routing,electrical,task,2026-08-05,2026-08-20,20
+elec-2,Antenna design for the GCS,electrical,task,2026-08-05,2026-08-20,20
 elec-3,Component selection for probe and container,electrical,task,2026-08-05,2026-08-20,20
 elec-4,Design soil collecting mechanism and analysis,electrical,task,2026-08-05,2026-08-20,20
-mgmt-1,Decal design,management,task,2026-08-05,2026-08-11,20
-mgmt-2,GCS design,management,task,2026-08-05,2026-08-12,20
-mgmt-3,Making PDR,management,task,2026-08-05,2026-08-13,20
-mgmt-4,Allocation of budgets to domains,management,task,2026-08-05,2026-08-14,20
-mgmt-5,Making CDR,management,task,2026-08-05,2026-08-15,20
+mgmt-1,Decal design,management,task,2026-08-05,2026-08-20,20
+mgmt-2,GCS design,management,task,2026-08-05,2026-08-20,20
+mgmt-3,Making PDR,management,task,2026-08-05,2026-08-20,20
+mgmt-4,Allocation of budgets to domains,management,task,2026-08-05,2026-08-20,20
+mgmt-5,Making CDR,management,task,2026-08-05,2026-08-20,20
