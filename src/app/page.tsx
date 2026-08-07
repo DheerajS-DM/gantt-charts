@@ -9,13 +9,13 @@ import { TaskItem } from '@/app/api/tasks/route';
 
 export default function Home() {
   const [tasks, setTasks] = useState<TaskItem[]>([]);
-  const [rawCsv, setRawCsv] = useState<string>('');
   const [currentView, setCurrentView] = useState<ViewType>('master');
   const [masterMode, setMasterMode] = useState<'flat' | 'grouped'>('flat');
   
   const [isCsvModalOpen, setIsCsvModalOpen] = useState(false);
   const [isAddTaskModalOpen, setIsAddTaskModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [notification, setNotification] = useState<string | null>(null);
 
   const showToast = (msg: string) => {
@@ -23,7 +23,7 @@ export default function Home() {
     setTimeout(() => setNotification(null), 3000);
   };
 
-  // Fetch initial tasks from backend CSV API
+  // Fetch initial tasks from MongoDB Atlas / API
   const fetchTasks = async () => {
     try {
       setLoading(true);
@@ -31,11 +31,10 @@ export default function Home() {
       const data = await res.json();
       if (data.tasks) {
         setTasks(data.tasks);
-        setRawCsv(data.rawCsv || '');
       }
     } catch (err) {
       console.error('Failed to load tasks', err);
-      showToast('Failed to connect to CSV API backend');
+      showToast('Failed to connect to API backend');
     } finally {
       setLoading(false);
     }
@@ -45,22 +44,36 @@ export default function Home() {
     fetchTasks();
   }, []);
 
-  // Save updated tasks array to backend CSV API
-  const saveTasks = async (updatedTasks: TaskItem[]) => {
-    setTasks(updatedTasks);
+  // Explicit Save function triggered by user or inline action
+  const saveTasksToDatabase = async (tasksToSave: TaskItem[]) => {
     try {
+      setSaving(true);
       const res = await fetch('/api/tasks', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tasks: updatedTasks }),
+        body: JSON.stringify({ tasks: tasksToSave }),
       });
       if (res.ok) {
-        showToast('Saved changes to backend CSV');
+        showToast('Saved changes to MongoDB Atlas!');
+      } else {
+        showToast('Failed to save to database');
       }
     } catch (err) {
       console.error('Error saving tasks', err);
-      showToast('Error syncing changes with CSV storage');
+      showToast('Error syncing changes with database');
+    } finally {
+      setSaving(false);
     }
+  };
+
+  // Local state update when editing/dragging (does NOT trigger infinite re-renders or immediate POST requests)
+  const handleLocalTaskUpdate = (updatedTasks: TaskItem[]) => {
+    setTasks(updatedTasks);
+  };
+
+  // Explicit manual save button click
+  const handleManualSave = () => {
+    saveTasksToDatabase(tasks);
   };
 
   // Import raw CSV string
@@ -98,13 +111,15 @@ export default function Home() {
   // Delete task by ID
   const handleDeleteTask = (taskId: string) => {
     const updated = tasks.filter((t) => t.id !== taskId);
-    saveTasks(updated);
+    setTasks(updated);
+    saveTasksToDatabase(updated);
   };
 
   // Add new task
   const handleAddTask = (newTask: TaskItem) => {
     const updated = [...tasks, newTask];
-    saveTasks(updated);
+    setTasks(updated);
+    saveTasksToDatabase(updated);
     showToast(`Added new task "${newTask.name}"`);
   };
 
@@ -138,7 +153,9 @@ export default function Home() {
         onUploadCsvClick={() => setIsCsvModalOpen(true)}
         onExportCsvClick={handleExportCsv}
         onResetClick={fetchTasks}
+        onSaveClick={handleManualSave}
         onAddTaskClick={() => setIsAddTaskModalOpen(true)}
+        isSaving={saving}
       />
 
       {/* Main Content Area */}
@@ -152,7 +169,7 @@ export default function Home() {
           currentView={currentView}
           masterMode={masterMode}
           onMasterModeChange={(mode) => setMasterMode(mode)}
-          onTaskUpdate={saveTasks}
+          onTaskUpdate={handleLocalTaskUpdate}
           onDeleteTask={handleDeleteTask}
         />
       )}

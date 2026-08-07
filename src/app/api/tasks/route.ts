@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { connectToDatabase } from '@/lib/mongodb';
 import fs from 'fs';
 import path from 'path';
 import Papa from 'papaparse';
@@ -15,97 +16,127 @@ export interface TaskItem {
   project?: string;
 }
 
-const DEFAULT_CSV = `id,name,start,end,progress,department,type,dependencies
-project-cs,CS Department,2026-08-01,2026-08-25,50,cs,project,
-task-cs-1,Backend API Setup,2026-08-01,2026-08-10,80,cs,task,
-task-cs-2,Database Schema & Migrations,2026-08-06,2026-08-15,40,cs,task,task-cs-1
-task-cs-3,Frontend Gantt Integration,2026-08-12,2026-08-25,20,cs,task,task-cs-2
-project-mech,Mechanical Department,2026-08-03,2026-08-28,35,mechanical,project,
-task-mech-1,Chassis CAD Design,2026-08-03,2026-08-12,90,mechanical,task,
-task-mech-2,Material Sourcing & Stress Analysis,2026-08-10,2026-08-18,30,mechanical,task,task-mech-1
-task-mech-3,3D Prototype Printing,2026-08-17,2026-08-28,0,mechanical,task,task-mech-2
-project-elec,Electrical Department,2026-08-05,2026-08-30,25,electrical,project,
-task-elec-1,PCB Circuit Schematic,2026-08-05,2026-08-14,60,electrical,task,
-task-elec-2,Microcontroller Firmware Flash,2026-08-14,2026-08-22,10,electrical,task,task-elec-1
-task-elec-3,Power Distribution Testing,2026-08-20,2026-08-30,0,electrical,task,task-elec-2
-project-mgmt,Management Department,2026-08-01,2026-08-31,65,management,project,
-task-mgmt-1,Project Roadmap & Milestones,2026-08-01,2026-08-07,100,management,task,
-task-mgmt-2,Budgeting & Resource Allocation,2026-08-06,2026-08-16,70,management,task,
-task-mgmt-3,Sprint Review & Client Presentation,2026-08-24,2026-08-31,0,management,task,`;
-
-// In-memory fallback for serverless read/write compatibility
-let inMemoryCsvStore: string | null = null;
-
-function getFilePath() {
-  return path.join(process.cwd(), 'data', 'tasks.csv');
-}
-
-function readCsvContent(): string {
-  if (inMemoryCsvStore !== null) {
-    return inMemoryCsvStore;
-  }
+function loadDiskCsvTasks(): TaskItem[] {
   try {
-    const filePath = getFilePath();
-    if (fs.existsSync(filePath)) {
-      const content = fs.readFileSync(filePath, 'utf-8');
-      inMemoryCsvStore = content;
-      return content;
+    const csvPath = path.join(process.cwd(), 'data', 'tasks.csv');
+    if (fs.existsSync(csvPath)) {
+      const fileContent = fs.readFileSync(csvPath, 'utf-8');
+      const parsed = Papa.parse<TaskItem>(fileContent, {
+        header: true,
+        skipEmptyLines: true,
+        dynamicTyping: true,
+      });
+      if (parsed.data && parsed.data.length > 0) {
+        return parsed.data;
+      }
     }
   } catch (err) {
-    console.warn('Could not read CSV file from disk, fallback to default in-memory CSV', err);
+    console.warn('Failed to read data/tasks.csv from disk:', err);
   }
-  inMemoryCsvStore = DEFAULT_CSV;
-  return DEFAULT_CSV;
-}
-
-function writeCsvContent(csvString: string): boolean {
-  inMemoryCsvStore = csvString;
-  try {
-    const filePath = getFilePath();
-    const dir = path.dirname(filePath);
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
-    fs.writeFileSync(filePath, csvString, 'utf-8');
-    return true;
-  } catch (err) {
-    console.warn('Could not write CSV to disk (Vercel serverless disk may be read-only). Memory state updated.', err);
-    return true;
-  }
+  return [];
 }
 
 export async function GET() {
-  const csvData = readCsvContent();
-  const parsed = Papa.parse<TaskItem>(csvData, {
-    header: true,
-    skipEmptyLines: true,
-    dynamicTyping: true,
-  });
+  try {
+    const { db } = await connectToDatabase();
+    const collection = db.collection<TaskItem>('tasks');
+    
+    let tasks = await collection.find({}).toArray();
 
-  return NextResponse.json({
-    tasks: parsed.data,
-    rawCsv: csvData,
-  });
+    // Seed ONLY ONCE if MongoDB collection is completely empty
+    if (tasks.length === 0) {
+      const initialCsvTasks = loadDiskCsvTasks();
+      if (initialCsvTasks.length > 0) {
+        await collection.insertMany(initialCsvTasks as any);
+        tasks = await collection.find({}).toArray();
+      }
+    }
+
+    // Clean up MongoDB _id field for frontend rendering
+    const formattedTasks = tasks.map(({ _id, ...rest }: any) => rest as TaskItem);
+
+    return NextResponse.json({
+      tasks: formattedTasks,
+      source: 'mongodb',
+    });
+  } catch (err: any) {
+    console.error('[GET /api/tasks Error]:', err);
+    return NextResponse.json(
+      {
+        error: 'Failed to fetch tasks from MongoDB Atlas',
+        details: err?.message || 'Database error',
+      },
+      { status: 500 }
+    );
+  }
 }
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
-    
-    // Check if raw csv text is passed or array of task items
-    if (typeof body.csv === 'string') {
-      writeCsvContent(body.csv);
-      return NextResponse.json({ success: true, message: 'CSV updated successfully' });
-    }
-    
-    if (Array.isArray(body.tasks)) {
-      const csvOutput = Papa.unparse(body.tasks);
-      writeCsvContent(csvOutput);
-      return NextResponse.json({ success: true, message: 'Tasks updated successfully' });
+    let body;
+    try {
+      body = await req.json();
+    } catch (parseError) {
+      return NextResponse.json(
+        { error: 'Invalid JSON request body' },
+        { status: 400 }
+      );
     }
 
-    return NextResponse.json({ error: 'Invalid payload. Provide "csv" string or "tasks" array.' }, { status: 400 });
+    const { db } = await connectToDatabase();
+    const collection = db.collection('tasks');
+
+    let tasksToSave: TaskItem[] = [];
+
+    if (typeof body.csv === 'string') {
+      const parsed = Papa.parse<TaskItem>(body.csv, {
+        header: true,
+        skipEmptyLines: true,
+        dynamicTyping: true,
+      });
+
+      if (parsed.errors && parsed.errors.length > 0) {
+        return NextResponse.json(
+          { error: 'Failed to parse CSV string', details: parsed.errors },
+          { status: 400 }
+        );
+      }
+      tasksToSave = parsed.data;
+    } else if (Array.isArray(body.tasks)) {
+      tasksToSave = body.tasks;
+    } else {
+      return NextResponse.json(
+        { error: 'Invalid payload structure. Provide a "tasks" array or "csv" string.' },
+        { status: 400 }
+      );
+    }
+
+    if (!Array.isArray(tasksToSave)) {
+      return NextResponse.json(
+        { error: 'Tasks payload must resolve to an array.' },
+        { status: 400 }
+      );
+    }
+
+    // Direct database mutation: MongoDB Atlas is the single source of truth
+    await collection.deleteMany({});
+    if (tasksToSave.length > 0) {
+      await collection.insertMany(tasksToSave);
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: 'Tasks updated directly in MongoDB Atlas',
+      count: tasksToSave.length,
+    });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message || 'Failed to save tasks' }, { status: 500 });
+    console.error('[POST /api/tasks Error]:', err);
+    return NextResponse.json(
+      {
+        error: 'Failed to save tasks to MongoDB Atlas',
+        details: err?.message || 'Database transaction error',
+      },
+      { status: 500 }
+    );
   }
 }

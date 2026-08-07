@@ -10,7 +10,8 @@ import {
   Upload, 
   Download, 
   RotateCcw,
-  Plus
+  Plus,
+  Save
 } from 'lucide-react';
 
 export type ViewType = 'master' | 'cs' | 'mechanical' | 'electrical' | 'management';
@@ -21,7 +22,9 @@ interface NavbarProps {
   onUploadCsvClick: () => void;
   onExportCsvClick: () => void;
   onResetClick: () => void;
+  onSaveClick: () => void;
   onAddTaskClick: () => void;
+  isSaving?: boolean;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -30,7 +33,9 @@ export const Navbar: React.FC<NavbarProps> = ({
   onUploadCsvClick,
   onExportCsvClick,
   onResetClick,
+  onSaveClick,
   onAddTaskClick,
+  isSaving = false,
 }) => {
   const views: { id: ViewType; label: string; icon: React.ReactNode; color: string }[] = [
     { id: 'master', label: 'Master View', icon: <Layers size={18} />, color: '#6366f1' },
@@ -180,8 +185,29 @@ export const Navbar: React.FC<NavbarProps> = ({
         </button>
 
         <button
+          onClick={onSaveClick}
+          disabled={isSaving}
+          title="Save changes to MongoDB Atlas"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '8px',
+            borderRadius: '8px',
+            border: '1px solid var(--border-color)',
+            background: 'var(--bg-input)',
+            color: '#10b981',
+            cursor: isSaving ? 'not-allowed' : 'pointer',
+            opacity: isSaving ? 0.6 : 1,
+            transition: 'all 0.2s ease',
+          }}
+        >
+          <Save size={16} />
+        </button>
+
+        <button
           onClick={onResetClick}
-          title="Reset to default dataset"
+          title="Refresh tasks from MongoDB Atlas"
           style={{
             display: 'flex',
             alignItems: 'center',
