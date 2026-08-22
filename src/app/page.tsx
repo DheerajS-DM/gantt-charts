@@ -42,7 +42,7 @@ export default function Home() {
 
   useEffect(() => {
     fetchTasks();
-  }, []);
+  }, [currentView]);
 
   // Explicit Save function triggered by user or inline action
   const saveTasksToDatabase = async (tasksToSave: TaskItem[]) => {
@@ -165,6 +165,7 @@ export default function Home() {
         </div>
       ) : (
         <GanttChartWrapper
+          key={`${currentView}-${masterMode}`}
           tasks={tasks}
           currentView={currentView}
           masterMode={masterMode}

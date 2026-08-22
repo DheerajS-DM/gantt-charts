@@ -32,6 +32,11 @@ export const GanttChartWrapper: React.FC<GanttChartWrapperProps> = ({
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<Partial<TaskItem>>({});
 
+  React.useEffect(() => {
+    setEditingTaskId(null);
+    setEditForm({});
+  }, [currentView, masterMode]);
+
   // Vibrant department color palette for high visibility on dark background
   const getDeptColorPalette = (dept: string) => {
     switch (dept) {

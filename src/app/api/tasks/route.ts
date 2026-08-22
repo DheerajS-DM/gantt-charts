@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/mongodb';
-import fs from 'fs';
-import path from 'path';
 import Papa from 'papaparse';
 
 export interface TaskItem {
@@ -16,41 +14,12 @@ export interface TaskItem {
   project?: string;
 }
 
-function loadDiskCsvTasks(): TaskItem[] {
-  try {
-    const csvPath = path.join(process.cwd(), 'data', 'tasks.csv');
-    if (fs.existsSync(csvPath)) {
-      const fileContent = fs.readFileSync(csvPath, 'utf-8');
-      const parsed = Papa.parse<TaskItem>(fileContent, {
-        header: true,
-        skipEmptyLines: true,
-        dynamicTyping: true,
-      });
-      if (parsed.data && parsed.data.length > 0) {
-        return parsed.data;
-      }
-    }
-  } catch (err) {
-    console.warn('Failed to read data/tasks.csv from disk:', err);
-  }
-  return [];
-}
-
 export async function GET() {
   try {
     const { db } = await connectToDatabase();
     const collection = db.collection<TaskItem>('tasks');
     
-    let tasks = await collection.find({}).toArray();
-
-    // Seed ONLY ONCE if MongoDB collection is completely empty
-    if (tasks.length === 0) {
-      const initialCsvTasks = loadDiskCsvTasks();
-      if (initialCsvTasks.length > 0) {
-        await collection.insertMany(initialCsvTasks as any);
-        tasks = await collection.find({}).toArray();
-      }
-    }
+    const tasks = await collection.find({}).toArray();
 
     // Clean up MongoDB _id field for frontend rendering
     const formattedTasks = tasks.map(({ _id, ...rest }: any) => rest as TaskItem);
