@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Papa from 'papaparse';
 import { Navbar, ViewType } from '@/components/Navbar';
 import { GanttChartWrapper } from '@/components/GanttChartWrapper';
@@ -23,20 +23,27 @@ export default function Home() {
     setTimeout(() => setNotification(null), 3000);
   };
 
+  const latestFetchId = useRef(0);
+
   // Fetch initial tasks from MongoDB Atlas / API
   const fetchTasks = async () => {
+    const fetchId = ++latestFetchId.current;
     try {
       setLoading(true);
       const res = await fetch('/api/tasks');
       const data = await res.json();
-      if (data.tasks) {
+      if (fetchId === latestFetchId.current && data.tasks) {
         setTasks(data.tasks);
       }
     } catch (err) {
-      console.error('Failed to load tasks', err);
-      showToast('Failed to connect to API backend');
+      if (fetchId === latestFetchId.current) {
+        console.error('Failed to load tasks', err);
+        showToast('Failed to connect to API backend');
+      }
     } finally {
-      setLoading(false);
+      if (fetchId === latestFetchId.current) {
+        setLoading(false);
+      }
     }
   };
 
