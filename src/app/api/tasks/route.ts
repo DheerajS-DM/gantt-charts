@@ -14,6 +14,20 @@ export interface TaskItem {
   project?: string;
 }
 
+export function getTaskFingerprint(task: TaskItem): string {
+  return JSON.stringify({
+    id: task.id,
+    name: task.name,
+    start: task.start,
+    end: task.end,
+    progress: task.progress,
+    department: task.department,
+    type: task.type,
+    dependencies: task.dependencies || '',
+    project: task.project || '',
+  });
+}
+
 export async function GET() {
   try {
     const { db } = await connectToDatabase();
@@ -21,8 +35,18 @@ export async function GET() {
     
     const tasks = await collection.find({}).toArray();
 
-    // Clean up MongoDB _id field for frontend rendering
-    const formattedTasks = tasks.map(({ _id, ...rest }: any) => rest as TaskItem);
+    // Clean up MongoDB _id field for frontend rendering and deduplicate
+    const seen = new Set<string>();
+    const formattedTasks: TaskItem[] = [];
+    
+    for (const t of tasks) {
+      const { _id, ...rest } = t as any;
+      const fingerprint = getTaskFingerprint(rest as TaskItem);
+      if (!seen.has(fingerprint)) {
+        seen.add(fingerprint);
+        formattedTasks.push(rest as TaskItem);
+      }
+    }
 
     return NextResponse.json({
       tasks: formattedTasks,
@@ -87,16 +111,26 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Direct database mutation: MongoDB Atlas is the single source of truth
+    // Direct database mutation: MongoDB Atlas is the single source of truth after fingerprint-based deduplication
+    const seen = new Set<string>();
+    const uniqueTasksToSave: TaskItem[] = [];
+    for (const t of tasksToSave) {
+      const fingerprint = getTaskFingerprint(t);
+      if (!seen.has(fingerprint)) {
+        seen.add(fingerprint);
+        uniqueTasksToSave.push(t);
+      }
+    }
+
     await collection.deleteMany({});
-    if (tasksToSave.length > 0) {
-      await collection.insertMany(tasksToSave);
+    if (uniqueTasksToSave.length > 0) {
+      await collection.insertMany(uniqueTasksToSave);
     }
 
     return NextResponse.json({
       success: true,
       message: 'Tasks updated directly in MongoDB Atlas',
-      count: tasksToSave.length,
+      count: uniqueTasksToSave.length,
     });
   } catch (err: any) {
     console.error('[POST /api/tasks Error]:', err);

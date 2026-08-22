@@ -125,8 +125,29 @@ export default function Home() {
   // Add new task
   const handleAddTask = (newTask: TaskItem) => {
     const updated = [...tasks, newTask];
-    setTasks(updated);
-    saveTasksToDatabase(updated);
+    
+    const seen = new Set<string>();
+    const uniqueTasks: TaskItem[] = [];
+    for (const t of updated) {
+      const fingerprint = JSON.stringify({
+        id: t.id,
+        name: t.name,
+        start: t.start,
+        end: t.end,
+        progress: t.progress,
+        department: t.department,
+        type: t.type,
+        dependencies: t.dependencies || '',
+        project: t.project || '',
+      });
+      if (!seen.has(fingerprint)) {
+        seen.add(fingerprint);
+        uniqueTasks.push(t);
+      }
+    }
+
+    setTasks(uniqueTasks);
+    saveTasksToDatabase(uniqueTasks);
     showToast(`Added new task "${newTask.name}"`);
   };
 
