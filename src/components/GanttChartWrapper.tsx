@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { ViewMode, Task as GanttTask } from 'gantt-task-react';
 import { TaskItem } from '@/app/api/tasks/route';
-import { Calendar, LayoutList, Sliders, Trash2, Edit2, Check, X } from 'lucide-react';
+import { Calendar, LayoutList, Sliders, Trash2, Edit2, Check, X, Camera } from 'lucide-react';
 
 const Gantt = dynamic(
   () => import('gantt-task-react').then((mod) => mod.Gantt),
@@ -31,11 +31,32 @@ export const GanttChartWrapper: React.FC<GanttChartWrapperProps> = ({
   const [viewMode, setViewMode] = useState<ViewMode>(ViewMode.Day);
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<Partial<TaskItem>>({});
+  const [isScreenshotMode, setIsScreenshotMode] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     setEditingTaskId(null);
     setEditForm({});
   }, [currentView, masterMode]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsScreenshotMode(false);
+      }
+    };
+
+    if (isScreenshotMode) {
+      document.body.classList.add('screenshot-active');
+      window.addEventListener('keydown', handleKeyDown);
+    } else {
+      document.body.classList.remove('screenshot-active');
+    }
+
+    return () => {
+      document.body.classList.remove('screenshot-active');
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isScreenshotMode]);
 
   // Vibrant department color palette for high visibility on dark background
   const getDeptColorPalette = (dept: string) => {
@@ -226,6 +247,28 @@ export const GanttChartWrapper: React.FC<GanttChartWrapperProps> = ({
 
         {/* Right Zoom Controls */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <button
+            onClick={() => setIsScreenshotMode(true)}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '5px 12px',
+              borderRadius: '6px',
+              border: '1px solid var(--border-color)',
+              background: 'rgba(99, 102, 241, 0.15)',
+              color: '#a5b4fc',
+              fontSize: '0.8rem',
+              cursor: 'pointer',
+              fontWeight: 600,
+              marginRight: '12px',
+              transition: 'all 0.15s ease',
+            }}
+            title="Full Screen Screenshot Mode"
+          >
+            <Camera size={14} /> Screenshot
+          </button>
+          
           <Calendar size={16} color="var(--text-muted)" />
           <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginRight: '4px' }}>Zoom:</span>
           {(['Day', 'Week', 'Month'] as const).map((mode) => {
@@ -255,7 +298,33 @@ export const GanttChartWrapper: React.FC<GanttChartWrapperProps> = ({
       </div>
 
       {/* Smooth Scrollable Gantt Chart Container */}
-      <div className="glass-panel smooth-scroll dark-gantt-wrapper" style={{ padding: '20px', minHeight: '350px' }}>
+      <div className={`glass-panel smooth-scroll dark-gantt-wrapper ${isScreenshotMode ? 'gantt-screenshot-overlay' : ''}`} style={{ padding: '20px', minHeight: '350px' }}>
+        {isScreenshotMode && (
+          <button
+            onClick={() => setIsScreenshotMode(false)}
+            style={{
+              position: 'absolute',
+              top: '20px',
+              right: '20px',
+              zIndex: 10000,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '8px 16px',
+              borderRadius: '8px',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              background: 'rgba(15, 23, 42, 0.8)',
+              color: 'var(--text-muted)',
+              cursor: 'pointer',
+              opacity: 0.3,
+              transition: 'opacity 0.2s ease',
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.opacity = '1')}
+            onMouseLeave={(e) => (e.currentTarget.style.opacity = '0.3')}
+          >
+            <X size={16} /> Press ESC to Exit
+          </button>
+        )}
         {ganttTasks.length === 0 ? (
           <div style={{ padding: '50px', textAlign: 'center', color: 'var(--text-muted)' }}>
             No tasks found for this view. Upload a CSV or click "Quick Add Task" to get started!
@@ -266,9 +335,9 @@ export const GanttChartWrapper: React.FC<GanttChartWrapperProps> = ({
             viewMode={viewMode}
             onDateChange={handleDateChange}
             onProgressChange={handleProgressChange}
-            listCellWidth="220px"
+            listCellWidth={isScreenshotMode ? "" : "220px"}
             columnWidth={viewMode === ViewMode.Month ? 250 : viewMode === ViewMode.Week ? 120 : 65}
-            ganttHeight={320}
+            ganttHeight={isScreenshotMode ? Math.max(typeof window !== 'undefined' ? window.innerHeight - 150 : 800, ganttTasks.length * 50 + 100) : 320}
             barCornerRadius={10}
             handleWidth={8}
           />
