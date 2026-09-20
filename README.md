@@ -1,6 +1,6 @@
-# 📊 GanttFlow - Department & Master Timeline Tracker
+# 📊 GanttFlow - Division & Master Timeline Tracker
 
-GanttFlow is an interactive, enterprise-grade timeline management web application built using **Next.js 16 (App Router)**, **TypeScript**, **React 19**, and **MongoDB Atlas**. It is designed for multi-disciplinary teams (Computer Science, Mechanical, Electrical, Management) to track project milestones, manage task dependencies, perform drag-and-drop schedule adjustments, and seamlessly import/export project timelines via CSV.
+GanttFlow is an interactive, enterprise-grade timeline management web application built using **Next.js 16 (App Router)**, **TypeScript**, **React 19**, and **MongoDB Atlas**. It is designed for multi-disciplinary teams across Division 1, Division 2, Division 3, and Division 4 to track project milestones, manage task dependencies, perform drag-and-drop schedule adjustments, and seamlessly import/export project timelines via CSV.
 
 ---
 
@@ -56,7 +56,7 @@ Gantt chart/
 │   ├── components/
 │   │   ├── GanttChartWrapper.tsx   # Interactive SVG Gantt chart & inline editable table
 │   │   ├── Modals.tsx              # CSV Import/Upload & Quick Task Creation modals
-│   │   └── Navbar.tsx              # Brand header, department tabs, & action bar
+│   │   └── Navbar.tsx              # Brand header, division tabs, & action bar
 │   └── lib/
 │       └── mongodb.ts              # MongoDB Atlas connection client with global pooling
 ├── .env                            # Environment variables (MongoDB connection URI & DB name)

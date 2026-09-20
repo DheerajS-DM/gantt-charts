@@ -18,6 +18,11 @@
   --accent-elec: #10b981;
   --accent-mgmt: #a855f7;
 
+  --accent-div1: #6366f1;
+  --accent-div2: #f59e0b;
+  --accent-div3: #10b981;
+  --accent-div4: #a855f7;
+
   --font-main: 'Plus Jakarta Sans', sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 }
@@ -90,7 +95,7 @@ body {
   border-color: rgba(255, 255, 255, 0.12);
 }
 
-/* Department Badge Styles */
+/* Division & Department Badge Styles */
 .dept-badge {
   display: inline-flex;
   align-items: center;
@@ -103,24 +108,28 @@ body {
   letter-spacing: 0.06em;
 }
 
+.dept-badge.division1,
 .dept-badge.cs {
   background: rgba(99, 102, 241, 0.15);
   color: #a5b4fc;
   border: 1px solid rgba(99, 102, 241, 0.3);
 }
 
+.dept-badge.division2,
 .dept-badge.mechanical {
   background: rgba(245, 158, 11, 0.15);
   color: #fcd34d;
   border: 1px solid rgba(245, 158, 11, 0.3);
 }
 
+.dept-badge.division3,
 .dept-badge.electrical {
   background: rgba(16, 185, 129, 0.15);
   color: #6ee7b7;
   border: 1px solid rgba(16, 185, 129, 0.3);
 }
 
+.dept-badge.division4,
 .dept-badge.management {
   background: rgba(168, 85, 247, 0.15);
   color: #d8b4fe;
@@ -254,14 +263,15 @@ body {
   border: none !important;
   border-radius: 0 !important;
   box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
+  display: block !important;
   overflow-y: auto !important;
+  overflow-x: auto !important;
 }
 
-/* Make sure the Gantt component itself grows to fill the overlay */
+/* Let the Gantt component itself grow to fill the overlay and trigger scrollbars */
 .gantt-screenshot-overlay > div {
-  flex: 1;
+  height: max-content;
+  min-height: 100%;
 }
 
 /* Hide scrollbars on the body when screenshot mode is active to prevent double scrolling */

@@ -108,7 +108,7 @@ export const CSVModal: React.FC<CSVModalProps> = ({ isOpen, onClose, onImportCsv
             rows={6}
             value={csvText}
             onChange={(e) => setCsvText(e.target.value)}
-            placeholder="id,name,start,end,progress,department,type&#10;task-1,Design UI,2026-08-01,2026-08-10,50,cs,task"
+            placeholder="id,name,start,end,progress,department,type&#10;task-1,Design Architecture,2026-08-01,2026-08-10,50,division1,task"
             style={{
               width: '100%',
               padding: '10px',
@@ -144,7 +144,7 @@ interface QuickAddModalProps {
 
 export const QuickAddModal: React.FC<QuickAddModalProps> = ({ isOpen, onClose, onAddTask }) => {
   const [name, setName] = useState('');
-  const [department, setDepartment] = useState<'cs' | 'mechanical' | 'electrical' | 'management'>('cs');
+  const [department, setDepartment] = useState<'division1' | 'division2' | 'division3' | 'division4'>('division1');
   const [type, setType] = useState<'task' | 'project'>('task');
   const [start, setStart] = useState(new Date().toISOString().split('T')[0]);
   const [end, setEnd] = useState(new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0]);
@@ -205,23 +205,23 @@ export const QuickAddModal: React.FC<QuickAddModalProps> = ({ isOpen, onClose, o
               required
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="e.g., Firmware Integration Test"
+              placeholder="e.g., Core Architecture Design"
               style={{ width: '100%', padding: '8px 12px', background: 'var(--bg-input)', border: '1px solid var(--border-color)', color: '#fff', borderRadius: '8px' }}
             />
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
             <div>
-              <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>Department</label>
+              <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>Division</label>
               <select
                 value={department}
                 onChange={(e) => setDepartment(e.target.value as any)}
                 style={{ width: '100%', padding: '8px 12px', background: 'var(--bg-input)', border: '1px solid var(--border-color)', color: '#fff', borderRadius: '8px' }}
               >
-                <option value="cs">CS</option>
-                <option value="mechanical">Mechanical</option>
-                <option value="electrical">Electrical</option>
-                <option value="management">Management</option>
+                <option value="division1">Division 1</option>
+                <option value="division2">Division 2</option>
+                <option value="division3">Division 3</option>
+                <option value="division4">Division 4</option>
               </select>
             </div>
 

@@ -58,27 +58,32 @@ export const GanttChartWrapper: React.FC<GanttChartWrapperProps> = ({
     };
   }, [isScreenshotMode]);
 
-  // Vibrant department color palette for high visibility on dark background
+  // Vibrant division color palette for high visibility on dark background
   const getDeptColorPalette = (dept: string) => {
-    switch (dept) {
+    const d = (dept || '').toLowerCase();
+    switch (d) {
+      case 'division1':
       case 'cs': 
         return {
           bg: '#4143c5',
           progress: '#6366f1',
           border: '#818cf8',
         };
+      case 'division2':
       case 'mechanical': 
         return {
           bg: '#b45309',
           progress: '#f59e0b',
           border: '#fbbf24',
         };
+      case 'division3':
       case 'electrical': 
         return {
           bg: '#047857',
           progress: '#10b981',
           border: '#34d399',
         };
+      case 'division4':
       case 'management': 
         return {
           bg: '#6b21a8',
@@ -237,7 +242,7 @@ export const GanttChartWrapper: React.FC<GanttChartWrapperProps> = ({
         ) : (
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span className={`dept-badge ${currentView}`}>
-              {currentView.toUpperCase()} DEPARTMENT
+              {currentView.toUpperCase().replace('DIVISION', 'DIVISION ')}
             </span>
             <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
               ({filteredTasks.length} items)
@@ -352,7 +357,7 @@ export const GanttChartWrapper: React.FC<GanttChartWrapperProps> = ({
             Direct Inline Task Editor
           </h3>
           <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-            Instant inline updates saved directly to CSV backend.
+            Instant inline updates saved directly to database.
           </span>
         </div>
 
@@ -361,7 +366,7 @@ export const GanttChartWrapper: React.FC<GanttChartWrapperProps> = ({
             <thead>
               <tr style={{ borderBottom: '1px solid var(--border-color)', textAlign: 'left', color: 'var(--text-muted)' }}>
                 <th style={{ padding: '10px 12px' }}>Task Name</th>
-                <th style={{ padding: '10px 12px' }}>Department</th>
+                <th style={{ padding: '10px 12px' }}>Division</th>
                 <th style={{ padding: '10px 12px' }}>Type</th>
                 <th style={{ padding: '10px 12px' }}>Start Date</th>
                 <th style={{ padding: '10px 12px' }}>End Date</th>
@@ -386,14 +391,14 @@ export const GanttChartWrapper: React.FC<GanttChartWrapperProps> = ({
                       </td>
                       <td style={{ padding: '8px 12px' }}>
                         <select
-                          value={editForm.department || 'cs'}
+                          value={editForm.department || 'division1'}
                           onChange={(e) => setEditForm({ ...editForm, department: e.target.value as any })}
                           style={{ padding: '6px 10px', background: 'var(--bg-input)', border: '1px solid var(--border-color)', color: '#fff', borderRadius: '6px' }}
                         >
-                          <option value="cs">CS</option>
-                          <option value="mechanical">Mechanical</option>
-                          <option value="electrical">Electrical</option>
-                          <option value="management">Management</option>
+                          <option value="division1">Division 1</option>
+                          <option value="division2">Division 2</option>
+                          <option value="division3">Division 3</option>
+                          <option value="division4">Division 4</option>
                         </select>
                       </td>
                       <td style={{ padding: '8px 12px' }}>
@@ -451,7 +456,7 @@ export const GanttChartWrapper: React.FC<GanttChartWrapperProps> = ({
                     </td>
                     <td style={{ padding: '12px' }}>
                       <span className={`dept-badge ${t.department}`}>
-                        {t.department}
+                        {(t.department || '').toUpperCase().replace('DIVISION', 'DIV ')}
                       </span>
                     </td>
                     <td style={{ padding: '12px', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
@@ -465,7 +470,7 @@ export const GanttChartWrapper: React.FC<GanttChartWrapperProps> = ({
                           <div style={{
                             width: `${t.progress}%`,
                             height: '100%',
-                            background: t.department === 'cs' ? '#6366f1' : t.department === 'mechanical' ? '#f59e0b' : t.department === 'electrical' ? '#10b981' : '#a855f7'
+                            background: t.department === 'division1' || t.department === 'cs' ? '#6366f1' : t.department === 'division2' || t.department === 'mechanical' ? '#f59e0b' : t.department === 'division3' || t.department === 'electrical' ? '#10b981' : '#a855f7'
                           }} />
                         </div>
                         <span style={{ fontSize: '0.75rem', fontFamily: 'var(--font-mono)' }}>{t.progress}%</span>

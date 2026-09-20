@@ -14,7 +14,7 @@ import {
   Save
 } from 'lucide-react';
 
-export type ViewType = 'master' | 'cs' | 'mechanical' | 'electrical' | 'management';
+export type ViewType = 'master' | 'division1' | 'division2' | 'division3' | 'division4';
 
 interface NavbarProps {
   currentView: ViewType;
@@ -39,10 +39,10 @@ export const Navbar: React.FC<NavbarProps> = ({
 }) => {
   const views: { id: ViewType; label: string; icon: React.ReactNode; color: string }[] = [
     { id: 'master', label: 'Master View', icon: <Layers size={18} />, color: '#6366f1' },
-    { id: 'cs', label: 'CS', icon: <Code2 size={18} />, color: '#818cf8' },
-    { id: 'mechanical', label: 'Mechanical', icon: <Wrench size={18} />, color: '#fbbf24' },
-    { id: 'electrical', label: 'Electrical', icon: <Zap size={18} />, color: '#34d399' },
-    { id: 'management', label: 'Management', icon: <Briefcase size={18} />, color: '#c084fc' },
+    { id: 'division1', label: 'Division 1', icon: <Code2 size={18} />, color: '#818cf8' },
+    { id: 'division2', label: 'Division 2', icon: <Wrench size={18} />, color: '#fbbf24' },
+    { id: 'division3', label: 'Division 3', icon: <Zap size={18} />, color: '#34d399' },
+    { id: 'division4', label: 'Division 4', icon: <Briefcase size={18} />, color: '#c084fc' },
   ];
 
   return (
@@ -73,7 +73,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           <h1 style={{ fontSize: '1.25rem', fontWeight: 800, letterSpacing: '-0.02em', background: 'linear-gradient(to right, #ffffff, #94a3b8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
             GanttFlow
           </h1>
-          <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Interactive Department Timeline Tracker</p>
+          <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Interactive Division Timeline Tracker</p>
         </div>
       </div>
 
